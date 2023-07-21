@@ -3,6 +3,12 @@ use serde::{Serialize, Deserialize};
 use serde_with::{serde_as, TimestampSeconds, formats::Flexible};
 use std::time::SystemTime;
 
+/// An API response.
+pub enum APIResponse<T> {
+    Error(BasicResponse),
+    Success(T)
+}
+
 /// User status.
 #[derive(Clone, Debug, Serialize, Deserialize, strum::Display, strum::EnumString)]
 #[strum(serialize_all="lowercase")]
@@ -252,6 +258,14 @@ pub struct User {
     total_executions: u64,
     note: String,
     ban_ip: String
+}
+
+/// The response for getting users / keys.
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct GetResponse {
+    success: bool,
+    message: String,
+    users: Vec<User>
 }
 
 /// The payload for resetting the HWID of a key.
