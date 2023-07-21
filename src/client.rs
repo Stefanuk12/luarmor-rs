@@ -88,7 +88,7 @@ impl Client {
     /// 
     /// Note that response body will be an object array containing users. If you specified a filter value (e.g `discord_id=124345`) the array will contain one user so you just have to read `users[0]`;
     pub async fn get_keys(&self, project_id: &str, payload: &GetPayload) -> Result<APIResponse<GetResponse>, reqwest::Error> {
-        let response = self.client.post(format!("https://api.luarmor.net/v3/projects/{}/users", project_id)).query(payload).send().await?;
+        let response = self.client.get(format!("https://api.luarmor.net/v3/projects/{}/users", project_id)).query(payload).send().await?;
         Ok(api_response!(response))
     }
 

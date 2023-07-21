@@ -4,6 +4,7 @@ use serde_with::{serde_as, TimestampSeconds, formats::Flexible};
 use std::time::SystemTime;
 
 /// An API response.
+#[derive(Debug, Clone)]
 pub enum APIResponse<T> {
     Error(BasicResponse),
     Success(T)
@@ -26,27 +27,35 @@ pub enum UserStatus {
 pub enum Messages {
     /// Success
     #[strum(serialize="API is up and working!")]
+	#[serde(rename="API is up and working!")]
     APIWorking,
     /// Incorrect API key
     #[strum(serialize="Invalid API key! Visit https://luarmor.net/ to get access.")]
+	#[serde(rename="Invalid API key! Visit https://luarmor.net/ to get access.")]
     IncorrectAPIKey,
     /// Invalid API key
     #[strum(serialize="Wrong API key")]
+	#[serde(rename="Wrong API key")]
     InvalidAPIKey,
     /// Success
     #[strum(serialize="Success!")]
+	#[serde(rename="Success!")]
     Success,
     /// Key has been deleted
     #[strum(serialize="User has been deleted!")]
+	#[serde(rename="User has been deleted!")]
     UserDeleted,
     /// Wrong project id / user key
     #[strum(serialize="Key not found")]
+	#[serde(rename="Key not found")]
     KeyNotFound,
     /// Project not found
     #[strum(serialize="Project not found!")]
+	#[serde(rename="Project not found!")]
     ProjectNotFound,
     /// Success!
-    #[strum(serialize="Sucessfully reset!")]
+    #[strum(serialize="Successfully reset!")]
+	#[serde(rename="Successfully reset!")]
     SuccessReset,
     //// Bad request
     /// 
@@ -55,9 +64,11 @@ pub enum Messages {
     /// - Reset hwid is disabled for this project. You can force it
     /// - User is banned. In this case, you need to unban it first.
     #[strum(serialize="User is on cooldown.")]
+	#[serde(rename="User is on cooldown.")]
     UserCooldown,
     /// Key or project not found
     #[strum(serialize="User key doesn't exist")]
+	#[serde(rename="User key doesn't exist")]
     UserKeyNotFound,
     /// Bad request
     /// 
@@ -66,107 +77,138 @@ pub enum Messages {
     /// - There's another key that's linked to same discord ID. In this case, you need to delete the other key.
     /// - Invalid discord ID.
     #[strum(serialize="This key already has a discord linked to it")]
-    DiscordAlreadyLinked
+	#[serde(rename="This key already has a discord linked to it")]
+    DiscordAlreadyLinked,
+    /// This is not found in the docs.
+    NothingToSee,
+    /// This is not found in the docs.
+    /// 
+    /// Happens when creating a key with an identifier that already exists.
+    #[strum(serialize="Identifier already exists.")]
+	#[serde(rename="Identifier already exists.")]
+    IdentifierAlreadyExists,
+    /// This is not found in the docs.
+    /// 
+    /// Happens when linking an invalid discord_id.
+    #[strum(serialize="Invalid discord_id")]
+	#[serde(rename="Invalid discord_id")]
+    InvalidDiscordId,
+    /// This is not found in the docs.
+    #[strum(serialize="Discord ID successfully linked!")]
+	#[serde(rename="Discord ID successfully linked!")]
+    DiscordIdSuccess,
+    /// This is not found in the docs.
+    /// 
+    /// Happens when you try to reset HWID without `force=true` and Reset Hwid is disabled for the script.
+    #[strum(serialize="Reset Hwid is disabled for this script")]
+	#[serde(rename="Reset Hwid is disabled for this script")]
+    ResetHWIDDisabled,
+    /// This is not found in the docs.
+    /// 
+    /// Happens when you successfully edit a user / key.
+    #[strum(serialize="User has been edited successfully!")]
+	#[serde(rename="User has been edited successfully!")]
+    EditSuccess,
 }
 
 /// A basic response.
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct BasicResponse {
-    success: bool,
-    message: String
+    pub success: bool,
+    pub message: Messages
 }
 
 /// Response for `/status`.
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct StatusResponse {
-    version: String,
-    active: bool,
-    message: String,
-    warning: bool,
-    warning_message: String
+    pub version: String,
+    pub active: bool,
+    pub message: Messages,
+    pub warning: bool,
+    pub warning_message: Messages
 }
 
 /// Project settings.
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct ProjectSettings {
-    reset_hwid_cooldown: i32
+    pub reset_hwid_cooldown: i32
 }
 
 /// A script.
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Script {
-    script_name: String,
-    script_id: String,
-    script_version: String,
-    ffa: bool,
-    silent: bool
+    pub script_name: String,
+    pub script_id: String,
+    pub script_version: String,
+    pub ffa: bool,
+    pub silent: bool
 }
 
 /// A project.
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Project {
-    platform: String,
-    id: String,
-    name: String,
-    settings: ProjectSettings,
-    scripts: Vec<Script>
+    pub platform: String,
+    pub id: String,
+    pub name: String,
+    pub settings: ProjectSettings,
+    pub scripts: Vec<Script>
 }
 
 /// Response for `/details`.
 #[serde_with::serde_as]
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct KeyDetailsResponse {
-    success: bool,
-    message: String,
-    email: String,
-    discord_id: String,
+    pub success: bool,
+    pub message: Messages,
+    pub email: String,
+    pub discord_id: String,
     #[serde_as(as = "TimestampSeconds<String, Flexible>")]
-    expires_at: SystemTime,
+    pub expires_at: SystemTime,
     #[serde_as(as = "TimestampSeconds<String, Flexible>")]
-    registered_at: SystemTime,
-    plan: String,
-    enabled: u8,
-    projects: Vec<Project>
+    pub registered_at: SystemTime,
+    pub plan: String,
+    pub enabled: u8,
+    pub projects: Vec<Project>
 }
 
 /// Used within [`KeyStatsResponse`].
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct ExecutionData {
-    frequency: u64,
-    executions: Vec<u64>
+    pub frequency: u64,
+    pub executions: Vec<u64>
 }
 
 /// Used within [`Stats`].
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct DefaultStats {
-    scripts: u64,
-    users: u64,
-    obfuscations: u64
+    pub scripts: u64,
+    pub users: u64,
+    pub obfuscations: u64
 }
 
 /// Used within [`KeyStatsResponse`].
 #[serde_with::serde_as]
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Stats {
-    obfuscations: u64,
-    scripts: u64,
+    pub obfuscations: u64,
+    pub scripts: u64,
     /// Only defined if `no_users` was set to `false`.
-    users: Option<u64>,
+    pub users: Option<u64>,
     /// Only defined if `no_users` was set to `false`.
-    attacks_blocked: Option<u64>,
+    pub attacks_blocked: Option<u64>,
     #[serde_as(as = "TimestampSeconds<String, Flexible>")]
-    reset_at: SystemTime,
-    default: DefaultStats
+    pub reset_at: SystemTime,
+    pub default: DefaultStats
 }
 
 /// Response for `/stats`.
 #[serde_with::serde_as]
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct KeyStatsResponse {
-    success: bool,
-    message: String,
-    execution_data: ExecutionData,
-    stats: Stats
+    pub success: bool,
+    pub message: Messages,
+    pub execution_data: ExecutionData,
+    pub stats: Stats
 }
 
 /// The payload for creating a key / user.
@@ -176,29 +218,29 @@ pub struct CreatePayload {
     /// Identifier of the user to whitelist.
     /// 
     /// Could be a HWID.
-    identifier: Option<String>,
+    pub identifier: Option<String>,
     /// Unix timestamp (seconds) of expiry date.
     /// 
     /// If you don't provide this field, it will never expire.
     #[serde_as(as = "Option<TimestampSeconds<String, Flexible>>")]
-    auth_expire: Option<SystemTime>,
+    pub auth_expire: Option<SystemTime>,
     /// Custom note for client.
     /// 
     /// This might be easier to identify the user.
-    note: Option<String>,
+    pub note: Option<String>,
     /// Discord ID of the user.
     /// 
     /// If not specified, user won't be able to resethwid on their own.
     /// They can still link their discord id to their key using /redeem command (if you configured the bot)
-    discord_id: Option<String>
+    pub discord_id: Option<String>
 }
 
 /// The response for creating a key / user
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct CreateResponse {
-    success: bool,
-    message: String,
-    user_key: String
+    pub success: bool,
+    pub message: Messages,
+    pub user_key: String
 }
 
 /// The payload for editing an existing user.
@@ -206,86 +248,86 @@ pub struct CreateResponse {
 #[derive(Default, Clone, Debug, Serialize, Deserialize)]
 pub struct EditPayload {
     /// Unique user_key to edit.
-    user_key: String,
+    pub user_key: String,
     /// Identifier of the user to whitelist.
     /// 
     /// Could be a HWID.
-    identifier: Option<String>,
+    pub identifier: Option<String>,
     /// Unix timestamp (seconds) of expiry date.
     /// 
     /// If you don't want it to expire, use negative one (-1) as value.
-    auth_expire: i32,
+    pub auth_expire: i32,
     /// Custom note for client.
     /// 
     /// This might be easier to identify the user.
-    note: Option<String>,
+    pub note: Option<String>,
     /// Discord ID of the user.
     /// 
     /// If not specified, user won't be able to resethwid on their own.
     /// They can still link their discord id to their key using /redeem command (if you configured the bot)
-    discord_id: Option<String>
+    pub discord_id: Option<String>
 }
 
 /// The payload for getting users.
 #[derive(Default, Clone, Debug, Serialize, Deserialize)]
 pub struct GetPayload {
     /// Discord ID to get the connected user.
-    discord_id: Option<String>,
+    pub discord_id: Option<String>,
     /// Key to get the connected user.
-    user_key: Option<String>,
+    pub user_key: Option<String>,
     /// HWID to get the connected user.
-    identifier: Option<String>
+    pub identifier: Option<String>
 }
 
 /// A single user.
 #[serde_with::serde_as]
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct User {
-    user_key: String,
-    identifier: String,
-    identifier_type: String,
-    discord_id: String,
+    pub user_key: String,
+    pub identifier: String,
+    pub identifier_type: String,
+    pub discord_id: String,
     #[serde_as(as = "TimestampSeconds<String, Flexible>")]
-    last_reset: SystemTime,
-    total_resets: u64,
-    auth_expire: i32,
+    pub last_reset: SystemTime,
+    pub total_resets: u64,
+    pub auth_expire: i32,
     /// Either `0` or `1`.
-    banned: u8,
-    ban_reason: String,
+    pub banned: u8,
+    pub ban_reason: String,
     #[serde_as(as = "TimestampSeconds<String, Flexible>")]
-    ban_expire: SystemTime,
-    unban_token: String,
-    total_executions: u64,
-    note: String,
-    ban_ip: String
+    pub ban_expire: SystemTime,
+    pub unban_token: String,
+    pub total_executions: u64,
+    pub note: String,
+    pub ban_ip: String
 }
 
 /// The response for getting users / keys.
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct GetResponse {
-    success: bool,
-    message: String,
-    users: Vec<User>
+    pub success: bool,
+    pub message: Messages,
+    pub users: Vec<User>
 }
 
 /// The payload for resetting the HWID of a key.
 #[derive(Default, Clone, Debug, Serialize, Deserialize)]
 pub struct ResetHWIDPayload {
     /// Key to reset the hwid of.
-    user_key: String,
+    pub user_key: String,
     /// Whether reset HWID is forced or not.
     /// 
     /// If `true`, it will ignore resethwid cooldown.
-    force: Option<bool>
+    pub force: Option<bool>
 }
 
 /// The payload for linking discord ID to a key.
 #[derive(Default, Clone, Debug, Serialize, Deserialize)]
 pub struct LinkDiscordPayload {
     /// Key to link the discord ID.
-    user_key: String,
+    pub user_key: String,
     /// Discord Id (1234578635849).
-    discord_id: String,
+    pub discord_id: String,
     /// If `true`, it will overwrite the discord ID if key already has one linked.
-    force: Option<bool>
+    pub force: Option<bool>
 }
