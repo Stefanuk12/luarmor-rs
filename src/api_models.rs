@@ -23,7 +23,11 @@ pub enum UserStatus {
 }
 
 /// Possible messages.
+/// 
+/// Federal said "messages can change anytime", "you must not rely on them".
+/// If you find any missing, make a PR.
 #[derive(Clone, Debug, Serialize, Deserialize, strum::Display, strum::EnumString)]
+#[non_exhaustive]
 pub enum Messages {
     /// Success
     #[strum(serialize="API is up and working!")]
