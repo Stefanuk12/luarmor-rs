@@ -4,14 +4,14 @@ use serde_with::{serde_as, TimestampSeconds, formats::Flexible};
 use std::time::SystemTime;
 
 /// An API response.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
 pub enum APIResponse<T> {
     Error(BasicResponse),
     Success(T)
 }
 
 /// User status.
-#[derive(Clone, Debug, Serialize, Deserialize, strum::Display, strum::EnumString)]
+#[derive(Debug, Clone, Copy, Eq, PartialEq, Ord, PartialOrd, Hash, Serialize, Deserialize, strum::Display, strum::EnumString)]
 #[strum(serialize_all="lowercase")]
 pub enum UserStatus {
     /// User has linked their hwid to key and its active.
@@ -26,7 +26,7 @@ pub enum UserStatus {
 /// 
 /// Federal said "messages can change anytime", "you must not rely on them".
 /// If you find any missing, make a PR.
-#[derive(Clone, Debug, Serialize, Deserialize, strum::Display, strum::EnumString)]
+#[derive(Debug, Clone, Copy, Eq, PartialEq, Ord, PartialOrd, Hash, Serialize, Deserialize, strum::Display, strum::EnumString)]
 #[non_exhaustive]
 pub enum Messages {
     /// Success
@@ -116,14 +116,14 @@ pub enum Messages {
 }
 
 /// A basic response.
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, Eq, PartialEq, Ord, PartialOrd, Hash, Serialize, Deserialize)]
 pub struct BasicResponse {
     pub success: bool,
     pub message: Messages
 }
 
 /// Response for `/status`.
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Debug, Serialize, Deserialize)]
 pub struct StatusResponse {
     pub version: String,
     pub active: bool,
@@ -133,13 +133,13 @@ pub struct StatusResponse {
 }
 
 /// Project settings.
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
 pub struct ProjectSettings {
     pub reset_hwid_cooldown: i32
 }
 
 /// A script.
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
 pub struct Script {
     pub script_name: String,
     pub script_id: String,
@@ -149,7 +149,7 @@ pub struct Script {
 }
 
 /// A project.
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
 pub struct Project {
     pub platform: String,
     pub id: String,
@@ -160,7 +160,7 @@ pub struct Project {
 
 /// Response for `/details`.
 #[serde_with::serde_as]
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
 pub struct KeyDetailsResponse {
     pub success: bool,
     pub message: Messages,
@@ -176,14 +176,14 @@ pub struct KeyDetailsResponse {
 }
 
 /// Used within [`KeyStatsResponse`].
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
 pub struct ExecutionData {
     pub frequency: u64,
     pub executions: Vec<u64>
 }
 
 /// Used within [`Stats`].
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
 pub struct DefaultStats {
     pub scripts: u64,
     pub users: u64,
@@ -192,7 +192,7 @@ pub struct DefaultStats {
 
 /// Used within [`KeyStatsResponse`].
 #[serde_with::serde_as]
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
 pub struct Stats {
     pub obfuscations: u64,
     pub scripts: u64,
@@ -207,7 +207,7 @@ pub struct Stats {
 
 /// Response for `/stats`.
 #[serde_with::serde_as]
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
 pub struct KeyStatsResponse {
     pub success: bool,
     pub message: Messages,
@@ -217,7 +217,7 @@ pub struct KeyStatsResponse {
 
 /// The payload for creating a key / user.
 #[serde_with::serde_as]
-#[derive(Default, Clone, Debug, Serialize, Deserialize)]
+#[derive(Default, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Debug, Serialize, Deserialize)]
 pub struct CreatePayload {
     /// Identifier of the user to whitelist.
     /// 
@@ -240,7 +240,7 @@ pub struct CreatePayload {
 }
 
 /// The response for creating a key / user
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
 pub struct CreateResponse {
     pub success: bool,
     pub message: Messages,
@@ -249,7 +249,7 @@ pub struct CreateResponse {
 
 /// The payload for editing an existing user.
 #[serde_with::serde_as]
-#[derive(Default, Clone, Debug, Serialize, Deserialize)]
+#[derive(Default, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Debug, Serialize, Deserialize)]
 pub struct EditPayload {
     /// Unique user_key to edit.
     pub user_key: String,
@@ -273,7 +273,7 @@ pub struct EditPayload {
 }
 
 /// The payload for getting users.
-#[derive(Default, Clone, Debug, Serialize, Deserialize)]
+#[derive(Default, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Debug, Serialize, Deserialize)]
 pub struct GetPayload {
     /// Discord ID to get the connected user.
     pub discord_id: Option<String>,
@@ -285,7 +285,7 @@ pub struct GetPayload {
 
 /// A single user.
 #[serde_with::serde_as]
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
 pub struct User {
     pub user_key: String,
     pub identifier: String,
@@ -307,7 +307,7 @@ pub struct User {
 }
 
 /// The response for getting users / keys.
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
 pub struct GetResponse {
     pub success: bool,
     pub message: Messages,
@@ -315,7 +315,7 @@ pub struct GetResponse {
 }
 
 /// The payload for resetting the HWID of a key.
-#[derive(Default, Clone, Debug, Serialize, Deserialize)]
+#[derive(Default, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Debug, Serialize, Deserialize)]
 pub struct ResetHWIDPayload {
     /// Key to reset the hwid of.
     pub user_key: String,
@@ -326,7 +326,7 @@ pub struct ResetHWIDPayload {
 }
 
 /// The payload for linking discord ID to a key.
-#[derive(Default, Clone, Debug, Serialize, Deserialize)]
+#[derive(Default, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Debug, Serialize, Deserialize)]
 pub struct LinkDiscordPayload {
     /// Key to link the discord ID.
     pub user_key: String,

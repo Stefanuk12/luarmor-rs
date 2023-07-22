@@ -1,5 +1,12 @@
 [package]
 name = "luarmor"
+description = "A simple API wrapper for luarmor.net"
+readme = "README.md"
+repository = "https://github.com/Stefanuk12/luarmor-rs/"
+homepage = "https://github.com/Stefanuk12/luarmor-rs/"
+license = "MIT"
+keywords = ["luarmor", "api", "wrapper"]
+categories = ["api-bindings", "asynchronous"]
 version = "0.1.0"
 edition = "2021"
 
