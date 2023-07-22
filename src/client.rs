@@ -13,6 +13,7 @@ macro_rules! api_response {
 }
 
 /// Used to create requests to Luarmor.
+#[derive(Clone, Debug)]
 pub struct Client {
     api_key: String,
     client: reqwest::Client
