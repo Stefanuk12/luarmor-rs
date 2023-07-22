@@ -3,11 +3,15 @@ use serde::{Serialize, Deserialize};
 use serde_with::{serde_as, TimestampSeconds, formats::Flexible};
 use std::time::SystemTime;
 
-/// An API response.
-#[derive(Debug, Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
-pub enum APIResponse<T> {
-    Error(BasicResponse),
-    Success(T)
+/// An API error response.
+#[derive(Debug, thiserror::Error)]
+pub enum APIError {
+    /// There was an error sending the request and parsing the response.
+    #[error(transparent)]
+    Request(#[from] reqwest::Error),
+    /// The request was successfully sent and parsed, but the API returned `success = false`.
+    #[error("the api returned an error")]
+    API(BasicResponse)
 }
 
 /// User status.
@@ -84,6 +88,8 @@ pub enum Messages {
 	#[serde(rename="This key already has a discord linked to it")]
     DiscordAlreadyLinked,
     /// This is not found in the docs.
+    #[strum(serialize="nothing to see here.")]
+	#[serde(rename="nothing to see here.")]
     NothingToSee,
     /// This is not found in the docs.
     /// 
