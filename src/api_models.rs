@@ -60,7 +60,7 @@ pub enum Messages {
     /// Project not found
     #[strum(serialize="Project not found!")]
 	#[serde(rename="Project not found!")]
-    ProjectNotFound,
+    ProjectNotFoundA,
     /// Success!
     #[strum(serialize="Successfully reset!")]
 	#[serde(rename="Successfully reset!")]
@@ -119,6 +119,14 @@ pub enum Messages {
     #[strum(serialize="User has been edited successfully!")]
 	#[serde(rename="User has been edited successfully!")]
     EditSuccess,
+    /// This is not found in the docs.
+    #[strum(serialize="Project not found")]
+	#[serde(rename="Project not found")]
+    ProjectNotFoundB,
+    /// This is not found in the docs.
+    #[strum(serialize="Discord ID already exists")]
+	#[serde(rename="Discord ID already exists")]
+    DiscordAlreadyExists,
 }
 
 /// A basic response.
@@ -172,9 +180,9 @@ pub struct KeyDetailsResponse {
     pub message: Messages,
     pub email: String,
     pub discord_id: String,
-    #[serde_as(as = "TimestampSeconds<String, Flexible>")]
+    #[serde_as(as = "TimestampSeconds<i64, Flexible>")]
     pub expires_at: SystemTime,
-    #[serde_as(as = "TimestampSeconds<String, Flexible>")]
+    #[serde_as(as = "TimestampSeconds<i64, Flexible>")]
     pub registered_at: SystemTime,
     pub plan: String,
     pub enabled: u8,
@@ -206,7 +214,7 @@ pub struct Stats {
     pub users: Option<u64>,
     /// Only defined if `no_users` was set to `false`.
     pub attacks_blocked: Option<u64>,
-    #[serde_as(as = "TimestampSeconds<String, Flexible>")]
+    #[serde_as(as = "TimestampSeconds<i64, Flexible>")]
     pub reset_at: SystemTime,
     pub default: DefaultStats
 }
@@ -232,7 +240,7 @@ pub struct CreatePayload {
     /// Unix timestamp (seconds) of expiry date.
     /// 
     /// If you don't provide this field, it will never expire.
-    #[serde_as(as = "Option<TimestampSeconds<String, Flexible>>")]
+    #[serde_as(as = "Option<TimestampSeconds<i64, Flexible>>")]
     pub auth_expire: Option<SystemTime>,
     /// Custom note for client.
     /// 
@@ -297,14 +305,14 @@ pub struct User {
     pub identifier: String,
     pub identifier_type: String,
     pub discord_id: String,
-    #[serde_as(as = "TimestampSeconds<String, Flexible>")]
+    #[serde_as(as = "TimestampSeconds<i64, Flexible>")]
     pub last_reset: SystemTime,
     pub total_resets: u64,
     pub auth_expire: i32,
     /// Either `0` or `1`.
     pub banned: u8,
     pub ban_reason: String,
-    #[serde_as(as = "TimestampSeconds<String, Flexible>")]
+    #[serde_as(as = "TimestampSeconds<i64, Flexible>")]
     pub ban_expire: SystemTime,
     pub unban_token: String,
     pub total_executions: u64,
