@@ -127,6 +127,10 @@ pub enum Messages {
     #[strum(serialize="Discord ID already exists")]
 	#[serde(rename="Discord ID already exists")]
     DiscordAlreadyExists,
+    /// This is not found in the docs.
+    #[strum(serialize="Discord ID already exists.")]
+	#[serde(rename="Discord ID already exists.")]
+    DiscordAlreadyExistsB,
 }
 
 /// A basic response.
