@@ -1,71 +1,106 @@
-// Dependencies
-use luarmor::{client::Client, api_models::{CreatePayload, GetPayload, LinkDiscordPayload, ResetHWIDPayload, EditPayload}};
+use api_builder::{ReqwestClient, RestClient, api_rest_client, error::APIError};
+use luarmor::{
+    LuarmorClient,
+    models::{
+        LuarmorMessage,
+        v3::projects::users::{CreateUser, GetUsers, LinkDiscordId, ResetHwid, UpdateUser},
+    },
+};
+use reqwest::{blocking::ClientBuilder, Proxy};
 
-/// Entrypoint.
-#[tokio::main]
-async fn main() {
-    // Load any `.env` variables.
-    dotenv::dotenv().unwrap();
+// Create our own client for sending requests
+#[derive(Default, ReqwestClient)]
+struct Client {
+    client: reqwest::blocking::Client,
+}
+#[api_rest_client(error = LuarmorMessage, base = "\"https://api.luarmor.net\"")]
+impl RestClient for Client {}
 
-    // Make sure we are given an API key and project
-    let api_key = std::env::var("API_KEY").expect("expected `API_KEY` in the environment.");
-    let project_id = &std::env::var("PROJECT_ID").expect("expected `PROJECT_ID` in the environment.");
+fn main() -> Result<(), APIError<LuarmorMessage>> {
+    // Initialisation
+    dotenv::dotenv().map_err(APIError::from_any_error)?;
+    let api_key = std::env::var("API_KEY").map_err(APIError::from_any_error)?;
+    let project_id = std::env::var("PROJECT_ID").map_err(APIError::from_any_error)?;
 
-    // Construct the client
-    let client = Client::new(&api_key);
+    // Construct the client, this one is proxy to Fiddler for testing
+    println!("{api_key} - {project_id}");
+    let client = LuarmorClient::new(api_key, Client {
+        client: ClientBuilder::new()
+            .proxy(Proxy::all("http://localhost:8888")?)
+            .build()?
+    });
 
     // Creating a key...
-    let Ok(result) = client.create_key(project_id, &CreatePayload {
-        identifier: Some("test".to_string()),
-        ..Default::default()
-    }).await else { panic!("create_key failed") };
-    println!("Created key - {}", result.user_key.clone());
+    let user_key = client.create_user(
+        CreateUser::builder()
+            .project_id(project_id.as_str())
+            .identifier("test")
+            .build(),
+    )?;
+    println!("Created key - {}", user_key);
 
     // See if we can find it
-    let Ok(users) = client.get_keys(project_id, &GetPayload {
-        user_key: Some(result.user_key.clone()),
-        ..Default::default()
-    }).await else { panic!("get_keys failed") };
-    assert_eq!(users.users.len(), 1);
+    let users = client.users(
+        GetUsers::builder()
+            .project_id(project_id.as_str())
+            .user_key(user_key.as_str())
+            .build(),
+    )?;
+    assert_eq!(users.len(), 1);
     println!("Found key!");
 
-    // Set the discord and reset HWID
-    let set_field = String::from("398271060514045964");
-    let Ok(_discord) = client.link_discord(project_id, &LinkDiscordPayload {
-        user_key: result.user_key.clone(),
-        discord_id: set_field.clone(),
-        ..Default::default()
-    }).await else { panic!("link_discord failed") };
-    println!("Reset discord");
-    let Ok(_identifier) = client.reset_hwid(project_id, &ResetHWIDPayload {
-        user_key: result.user_key.clone(),
-        force: Some(true)
-    }).await else { panic!("reset_hwid failed (2)") };
+    // Set the discord
+    let discord_id = "398271060514045964";
+    client.link_discord(
+        LinkDiscordId::builder()
+            .project_id(project_id.as_str())
+            .user_key(user_key.as_str())
+            .discord_id(discord_id)
+            .build(),
+    )?;
+    println!("Linked discord");
+
+    // Reset HWID
+    client.reset_hwid(
+        ResetHwid::builder()
+            .project_id(project_id.as_str())
+            .user_key(user_key.as_str())
+            .force(true)
+            .build(),
+    )?;
     println!("Reset hwid");
 
     // Update the key
-    let Ok(_edit) = client.update_key(project_id, &EditPayload {
-        user_key: result.user_key.clone(),
-        note: Some(set_field.clone()),
-        ..Default::default()
-    }).await else { panic!("upate_key failed (2)")};
+    let note = "sigma";
+    client.update_user(
+        UpdateUser::builder()
+            .project_id(project_id.as_str())
+            .user_key(user_key.as_str())
+            .note(note)
+            .build(),
+    )?;
     println!("Set note");
 
     // Grab the key again
-    let Ok(users) = client.get_keys(project_id, &GetPayload {
-        user_key: Some(result.user_key.clone()),
-        ..Default::default()
-    }).await else { panic!("get_keys failed (2)") };
+    let users = client.users(
+        GetUsers::builder()
+            .project_id(project_id.as_str())
+            .user_key(user_key.as_str())
+            .build(),
+    )?;
+    assert_eq!(users.len(), 1);
 
-    assert_eq!(users.users.len(), 1);
-    let user = users.users.first().unwrap();
-    assert_eq!(user.note, set_field.clone());
-    assert_eq!(user.identifier, String::from(""));
-    assert_eq!(user.discord_id, set_field.clone());
+    // Check if our changes were successful
+    let user = users.first().unwrap();
+    assert_eq!(user.note, Some(note.to_string()));
+    assert_eq!(user.identifier, None);
+    assert_eq!(user.discord_id, Some(discord_id.to_string()));
 
     println!("Found key and changes found!");
 
     // Finally delete the key
-    let Ok(_delete) = client.delete_key(project_id, &result.user_key.clone()).await else { panic!("get_keys failed (2)") };
-    println!("Deleted key - {}", user.user_key);
+    client.delete_user(&project_id, &user_key)?;
+    println!("Deleted key - {}", user_key);
+
+    Ok(())
 }

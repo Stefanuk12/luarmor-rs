@@ -1,20 +1,25 @@
-// Dependencies
-use luarmor::client::Client;
+use api_builder::{api_rest_client, error::APIError, ReqwestClient, RestClient};
+use luarmor::{models::LuarmorMessage, LuarmorClient};
 
-/// Entrypoint.
-#[tokio::main]
-async fn main() {
-    // Load any `.env` variables.
-    dotenv::dotenv().unwrap();
+// Create our own client for sending requests
+#[derive(Default, ReqwestClient)]
+struct Client {
+    client: reqwest::blocking::Client,
+}
+#[api_rest_client(error = LuarmorMessage, base = "\"https://api.luarmor.net\"")]
+impl RestClient for Client { }
 
-    // Make sure we are given an API key
-    let api_key = std::env::var("API_KEY").expect("expected `API_KEY` in the environment.");
+fn main() -> Result<(), APIError<LuarmorMessage>> {
+    // Initialisation
+    dotenv::dotenv().map_err(APIError::from_any_error)?;
+    let api_key = std::env::var("API_KEY").map_err(APIError::from_any_error)?;
 
     // Construct the client
-    let client = Client::new(&api_key);
+    let client = LuarmorClient::new(api_key, Client::default());
 
     // Log each request
-    println!("API status:\n{:?}\n---", client.status().await.expect("status failed"));
-    println!("API key details:\n{:?}\n---", client.key_details().await.expect("key_details failed"));
-    println!("API Key stats:\n{:?}\n---", client.key_stats(false).await.expect("key_stats failed"));
+    println!("API status:\n{:?}\n---", client.status()?);
+    println!("API key details:\n{:?}\n---", client.details()?);
+    println!("API Key stats:\n{:?}\n---", client.stats(false)?);
+    Ok(())
 }
