@@ -1,5 +1,5 @@
 use api_builder::{AsyncClient, AsyncQuery, Client, Query, RestClient, error::APIError};
-use http::{header::AUTHORIZATION, HeaderValue};
+use http::{HeaderValue, header::AUTHORIZATION};
 
 use crate::{
     Luarmor,
@@ -66,10 +66,7 @@ where
         Luarmor(payload).query(self)
     }
 
-    pub fn create_user(
-        &self,
-        payload: CreateUser<'_>,
-    ) -> Result<String, APIError<C::Error>> {
+    pub fn create_user(&self, payload: CreateUser<'_>) -> Result<String, APIError<C::Error>> {
         let x: Result<CreateUserResponse, APIError<C::Error>> = Luarmor(payload).query(self);
         x.map(|x| x.user_key)
     }
@@ -245,7 +242,9 @@ where
         &self,
         mut request: http::Request<Vec<u8>>,
     ) -> Result<http::Response<api_builder::Bytes>, APIError<Self::Error>> {
-        request.headers_mut().append(AUTHORIZATION, HeaderValue::from_str(self.api_key.as_str())?);
+        request
+            .headers_mut()
+            .append(AUTHORIZATION, HeaderValue::from_str(self.api_key.as_str())?);
         self.client.rest(request)
     }
 }
