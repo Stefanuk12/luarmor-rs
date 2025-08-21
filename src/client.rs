@@ -1,5 +1,5 @@
-use api_builder::{AsyncClient, AsyncQuery, Client, Query, RestClient, error::APIError};
-use http::{HeaderValue, header::AUTHORIZATION};
+use api_builder::{error::APIError, AsyncClient, AsyncQuery, Bytes, Client, Query, RestClient, Url};
+use http::{header::AUTHORIZATION, HeaderValue, Request, Response};
 
 use crate::{
     Luarmor,
@@ -230,7 +230,7 @@ where
 {
     type Error = C::Error;
 
-    fn rest_endpoint(&self, path: &str) -> Result<api_builder::Url, APIError<Self::Error>> {
+    fn rest_endpoint(&self, path: &str) -> Result<Url, APIError<Self::Error>> {
         self.client.rest_endpoint(path)
     }
 }
@@ -240,8 +240,8 @@ where
 {
     fn rest(
         &self,
-        mut request: http::Request<Vec<u8>>,
-    ) -> Result<http::Response<api_builder::Bytes>, APIError<Self::Error>> {
+        mut request: Request<Vec<u8>>,
+    ) -> Result<Response<Bytes>, APIError<Self::Error>> {
         request
             .headers_mut()
             .append(AUTHORIZATION, HeaderValue::from_str(self.api_key.as_str())?);
@@ -254,9 +254,9 @@ where
 {
     fn rest_async(
         &self,
-        request: http::Request<Vec<u8>>,
-    ) -> impl std::future::Future<
-        Output = Result<http::Response<api_builder::Bytes>, APIError<Self::Error>>,
+        request: Request<Vec<u8>>,
+    ) -> impl Future<
+        Output = Result<Response<Bytes>, APIError<Self::Error>>,
     > + Send {
         self.client.rest_async(request)
     }

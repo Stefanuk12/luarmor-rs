@@ -1,4 +1,4 @@
-use api_builder::{api_rest_client, error::APIError, ReqwestClient, RestClient};
+use api_builder::{api_rest_client, error::APIError, APIErrorKind, ReqwestClient, RestClient};
 use luarmor::{models::LuarmorMessage, LuarmorClient};
 
 // Create our own client for sending requests
@@ -11,8 +11,8 @@ impl RestClient for Client { }
 
 fn main() -> Result<(), APIError<LuarmorMessage>> {
     // Initialisation
-    dotenv::dotenv().map_err(APIError::from_any_error)?;
-    let api_key = std::env::var("API_KEY").map_err(APIError::from_any_error)?;
+    dotenv::dotenv().map_err(APIErrorKind::from_any_error)?;
+    let api_key = std::env::var("API_KEY").map_err(APIErrorKind::from_any_error)?;
 
     // Construct the client
     let client = LuarmorClient::new(api_key, Client::default());

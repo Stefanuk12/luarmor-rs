@@ -1,4 +1,4 @@
-use api_builder::{ReqwestClient, RestClient, api_rest_client, error::APIError};
+use api_builder::{api_rest_client, error::APIError, APIErrorKind, ReqwestClient, RestClient};
 use luarmor::{
     LuarmorClient,
     models::{
@@ -18,9 +18,9 @@ impl RestClient for Client {}
 
 fn main() -> Result<(), APIError<LuarmorMessage>> {
     // Initialisation
-    dotenv::dotenv().map_err(APIError::from_any_error)?;
-    let api_key = std::env::var("API_KEY").map_err(APIError::from_any_error)?;
-    let project_id = std::env::var("PROJECT_ID").map_err(APIError::from_any_error)?;
+    dotenv::dotenv().map_err(APIErrorKind::from_any_error)?;
+    let api_key = std::env::var("API_KEY").map_err(APIErrorKind::from_any_error)?;
+    let project_id = std::env::var("PROJECT_ID").map_err(APIErrorKind::from_any_error)?;
 
     // Construct the client, this one is proxy to Fiddler for testing
     println!("{api_key} - {project_id}");
