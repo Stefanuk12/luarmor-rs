@@ -10,4 +10,4 @@ macro_rules! import {
 
 pub mod models;
 
-import!(sub_client, combinator);
+import!(client, combinator);
