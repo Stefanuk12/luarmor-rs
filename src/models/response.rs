@@ -1,6 +1,5 @@
 use std::{convert::Infallible, str::FromStr};
 
-use api_builder::error::APIClientError;
 use serde::Deserialize;
 
 /// Possible messages.
@@ -84,7 +83,6 @@ pub enum LuarmorMessage {
     #[error("{0}")]
     Other(String),
 }
-impl APIClientError for LuarmorMessage {}
 impl FromStr for LuarmorMessage {
     type Err = Infallible;
 
